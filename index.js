@@ -2,6 +2,8 @@ var fs = require('fs')
 var stdin = process.stdin
 var stdout = process.stdout
 var dirpath = process.cwd()
+// 储存当前目录下所有文件stat信息,用于判断文件/文件夹
+var file_stats = []
 
 function readDir() {
     fs.readdir(dirpath, function(err, files) {
@@ -10,6 +12,8 @@ function readDir() {
             return console.log('\033[31m 这是一个空的文件夹！ \033[39m \n')
         }
         console.log(' 当前位置 \033[33m' + dirpath + ': \n \033[39m')
+        // 清空当前目录下所有文件stat信息
+        file_stats = []
         // 列出文件
         forFiles(dirpath, files, 0)
     })
@@ -17,7 +21,6 @@ function readDir() {
 
 function forFiles(dirpath, files, i) {
     var filename = files[i]
-    var file_stats = []
     fs.stat(`${dirpath}/${filename}`, function(err, stat) {
         file_stats.push(stat)
         if(stat.isDirectory()) {
@@ -42,10 +45,18 @@ function forFiles(dirpath, files, i) {
 
 function readFile(data, files, file_stats) {
     var filename = files[Number(data)]
+    var stat = file_stats[Number(data)]
     if(!filename) {
         stdout.write('\033[31m 等待输入：\033[39m')
     } else {
-        
+        if(stat.isDirectory()) {
+            dirpath = `${dirpath}\\${filename}`
+            readDir()
+        } else {
+            // fs.readFile(`${dirpath}/${filename}`, 'utf8', function(err, data) {
+            //     console.log(data)
+            // })
+        }
     }
 }
 
